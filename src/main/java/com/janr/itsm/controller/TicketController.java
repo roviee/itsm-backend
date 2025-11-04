@@ -25,19 +25,19 @@ public class TicketController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('USER', 'SUPPORT_STAFF', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('EMPLOYEE', 'SUPPORT_STAFF', 'ADMIN')")
     public ResponseEntity<ApiResponse> getTicketById(@PathVariable Long id, @AuthenticationPrincipal User currentUser) {
         return okResponse(ticketService.getTicketById(id, currentUser));
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('USER', 'SUPPORT_STAFF', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('EMPLOYEE', 'SUPPORT_STAFF', 'ADMIN')")
     public ResponseEntity<ApiResponse> createTicket(@RequestBody Ticket ticket) {
         return okResponse(ticketService.createTicket(ticket));
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('USER', 'SUPPORT_STAFF', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('EMPLOYEE', 'SUPPORT_STAFF', 'ADMIN')")
     public ResponseEntity<ApiResponse> getTickets(@AuthenticationPrincipal User currentUser) {
         return okResponse(ticketService.getTicketForUser(currentUser));
     }
@@ -49,7 +49,7 @@ public class TicketController {
     }
 
     @PatchMapping("/update/{id}")
-    @PreAuthorize("hasAnyRole('USER')")
+    @PreAuthorize("hasAnyRole('SUPPORT_STAFF', 'ADMIN')")
     public ResponseEntity<ApiResponse> updatePatchPriority (@PathVariable Long id, @RequestBody Ticket ticket) {
         return okResponse(ticketService.updatePatchPriority(id, ticket));
     }

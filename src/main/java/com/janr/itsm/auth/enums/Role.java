@@ -1,7 +1,7 @@
 package com.janr.itsm.auth.enums;
 
 public enum Role {
-    USER,
+    EMPLOYEE,
     SUPPORT_STAFF,
     ADMIN
 }

@@ -34,7 +34,7 @@ public class SecurityConfiguration {
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/support/**").hasAnyRole("SUPPORT_STAFF", "ADMIN")
-                        .requestMatchers("/api/user/**").hasAnyRole("USER", "SUPPORT_STAFF", "ADMIN")
+                        .requestMatchers("/api/employee/**").hasAnyRole("EMPLOYEE", "SUPPORT_STAFF", "ADMIN")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
