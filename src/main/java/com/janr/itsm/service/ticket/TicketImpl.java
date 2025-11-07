@@ -46,10 +46,7 @@ public class TicketImpl implements TicketService {
         return switch (user.getRole()) {
             case ADMIN -> true;
             case SUPPORT_STAFF -> {
-                if (ticket.getAssignedTo() != null && user.equals(ticket.getAssignedTo())) {
-                    yield true;
-                }
-                yield ticket.getStatus() ==  Status.OPEN;
+                yield user.equals(ticket.getAssignedTo());
             }
             default -> user.equals(ticket.getCreatedBy());
         };
@@ -91,7 +88,7 @@ public class TicketImpl implements TicketService {
         return getConvertedTicketItem(
                 switch (currentUser.getRole()) {
                     case ADMIN -> ticketRepository.findAll();
-                    case SUPPORT_STAFF -> ticketRepository.findByAssignedToOrStatus(currentUser, Status.OPEN);
+                    case SUPPORT_STAFF -> ticketRepository.findByAssignedTo(currentUser);
                     default -> ticketRepository.findByCreatedBy(currentUser);
                 }
         );
@@ -100,7 +97,7 @@ public class TicketImpl implements TicketService {
     @Override
     public TicketDto assignTicket(Long ticketId, Long staffId) {
 
-        Ticket ticket = ticketRepository.findById(staffId)
+        Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new NotFoundException("Ticket not found"));;
 
         User staff = userRepository.findById(staffId)
@@ -113,7 +110,7 @@ public class TicketImpl implements TicketService {
         ticket.setAssignedTo(staff);
         ticket.setStatus(Status.IN_PROGRESS);
 
-        return convertToDto(ticket);
+        return convertToDto(ticketRepository.save(ticket));
     }
 
     @Override
@@ -164,6 +161,7 @@ public class TicketImpl implements TicketService {
         dto.setEmail(user.getEmail());
         dto.setFullname(user.getFullname());
         dto.setRole(user.getRole());
+        dto.setCreatedAt(user.getCreatedAt());
         return dto;
     }
 }
