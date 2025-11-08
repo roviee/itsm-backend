@@ -14,7 +14,7 @@ public interface TicketService {
     TicketDto assignTicket(Long ticketId,  Long staffId);
     TicketDto convertToDto(Ticket ticket);
     List<TicketDto> getConvertedTicketItem(List<Ticket> tickets);
-    TicketDto updatePatchPriority(Long id, Ticket ticket);
+    TicketDto updateTicket(Long ticketId, Ticket ticket, User currentUser);
     void deleteTicket(Long id);
 
 }

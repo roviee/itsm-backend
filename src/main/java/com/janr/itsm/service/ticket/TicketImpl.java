@@ -114,12 +114,28 @@ public class TicketImpl implements TicketService {
     }
 
     @Override
-    public TicketDto updatePatchPriority(Long id, Ticket ticket) {
-        Ticket ticketUpdated = ticketRepository.findById(id)
+    public TicketDto updateTicket(Long ticketId, Ticket ticket, User currentUser) {
+        Ticket ticketUpdated = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new NotFoundException("Ticket not found"));;
 
-        ticketUpdated.setPriority(ticket.getPriority());
-
+        switch (currentUser.getRole()) {
+            case ADMIN -> {
+                if (ticket.getPriority() != null) {
+                    ticketUpdated.setPriority(ticket.getPriority());
+                }
+                if (ticket.getStatus() != null) {
+                    ticketUpdated.setStatus(ticket.getStatus());
+                }
+            }
+            case SUPPORT_STAFF -> {
+                if (ticket.getStatus() != null) {
+                    ticketUpdated.setStatus(ticket.getStatus());
+                } else {
+                    throw new AccessDeniedException("Staff cannot change priority");
+                }
+            }
+            default -> throw new AccessDeniedException("Authorized role");
+        }
         return convertToDto(ticketRepository.save(ticketUpdated));
 
     }

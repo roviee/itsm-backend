@@ -48,10 +48,11 @@ public class TicketController {
         return okResponse(ticketService.assignTicket(id, staffId));
     }
 
-    @PatchMapping("/update/{id}")
+    @PutMapping("/update/{id}")
     @PreAuthorize("hasAnyRole('SUPPORT_STAFF', 'ADMIN')")
-    public ResponseEntity<ApiResponse> updatePatchPriority (@PathVariable Long id, @RequestBody Ticket ticket) {
-        return okResponse(ticketService.updatePatchPriority(id, ticket));
+    public ResponseEntity<ApiResponse> updateTicket (@PathVariable Long id, @RequestBody Ticket ticket,
+                                                     @AuthenticationPrincipal User currentUser) {
+        return okResponse(ticketService.updateTicket(id, ticket, currentUser));
     }
 
 
