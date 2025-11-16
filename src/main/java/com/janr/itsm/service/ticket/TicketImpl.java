@@ -24,6 +24,7 @@ import java.util.List;
 public class TicketImpl implements TicketService {
     final TicketRepository ticketRepository;
     final UserRepository userRepository;
+    private static final String PREFIX = "INC";
 
     @Override
     public List<TicketDto> getAllTicket() {
@@ -56,6 +57,7 @@ public class TicketImpl implements TicketService {
     public TicketDto createTicket(Ticket ticket) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String nextTicketNumber = generateNextTicketNumber();
 
         if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
             String email = userDetails.getUsername();
@@ -63,6 +65,7 @@ public class TicketImpl implements TicketService {
             User user = userRepository.findByEmail(email)
                     .orElseThrow(() -> new IllegalStateException("Authenticated user not found in database: " + email));
 
+            ticket.setTicketNumber(nextTicketNumber);
             ticket.setCreatedBy(user);
             ticket.setAssignedTo(null);
             ticket.setStatus(Status.OPEN);
@@ -81,6 +84,16 @@ public class TicketImpl implements TicketService {
         } else {
             throw new IllegalStateException("User not authenticated or authentication principal is not a UserDetails instance");
         }
+    }
+
+    private String generateNextTicketNumber() {
+        Ticket lastTicket = ticketRepository.findTopByOrderByIdDesc();
+        int nextNumber = 1;
+        if (lastTicket != null && lastTicket.getTicketNumber() != null) {
+            String numberPart = lastTicket.getTicketNumber().replace(PREFIX, "");
+            nextNumber = Integer.parseInt(numberPart) + 1;
+        }
+        return PREFIX + String.format("%07d", nextNumber);
     }
 
     @Override
@@ -157,6 +170,7 @@ public class TicketImpl implements TicketService {
     public TicketDto convertToDto(Ticket ticket) {
         TicketDto ticketDto = new TicketDto();
         ticketDto.setId(ticket.getId());
+        ticketDto.setTicketNumber(ticket.getTicketNumber());
         ticketDto.setTitle(ticket.getTitle());
         ticketDto.setDescription(ticket.getDescription());
         ticketDto.setCategory(ticket.getCategory());
