@@ -4,6 +4,7 @@ import com.janr.itsm.auth.model.User;
 import com.janr.itsm.enums.Priority;
 import com.janr.itsm.enums.Status;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,11 +26,14 @@ public class Ticket {
     @Column(unique = true)
     private String ticketNumber;
 
+    @NotBlank(message = "Title must not blank")
     private String title;
 
+    @NotBlank(message = "Description must not blank")
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @NotBlank(message = "Category must not blank")
     private String category;
 
     @Enumerated(EnumType.STRING)

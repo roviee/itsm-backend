@@ -4,6 +4,7 @@ import com.janr.itsm.auth.model.User;
 import com.janr.itsm.model.Ticket;
 import com.janr.itsm.response.ApiResponse;
 import com.janr.itsm.service.ticket.TicketService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -32,7 +33,7 @@ public class TicketController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('EMPLOYEE', 'SUPPORT_STAFF', 'ADMIN')")
-    public ResponseEntity<ApiResponse> createTicket(@RequestBody Ticket ticket) {
+    public ResponseEntity<ApiResponse> createTicket(@Valid @RequestBody Ticket ticket) {
         return okResponse(ticketService.createTicket(ticket));
     }
 
