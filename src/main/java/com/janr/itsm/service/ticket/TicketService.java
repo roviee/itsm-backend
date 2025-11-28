@@ -3,6 +3,7 @@ package com.janr.itsm.service.ticket;
 import com.janr.itsm.auth.model.User;
 import com.janr.itsm.dto.TicketDto;
 import com.janr.itsm.model.Ticket;
+import com.janr.itsm.request.TicketUpdateRequest;
 
 import java.util.List;
 
@@ -14,7 +15,7 @@ public interface TicketService {
     TicketDto assignTicket(Long ticketId,  Long staffId);
     TicketDto convertToDto(Ticket ticket);
     List<TicketDto> getConvertedTicketItem(List<Ticket> tickets);
-    TicketDto updateTicket(Long ticketId, Ticket ticket, User currentUser);
+    TicketDto updateTicket(Long ticketId, TicketUpdateRequest request, User currentUser);
     void deleteTicket(Long id);
 
 }

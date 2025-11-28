@@ -10,6 +10,7 @@ import com.janr.itsm.enums.Status;
 import com.janr.itsm.exceptions.NotFoundException;
 import com.janr.itsm.model.Ticket;
 import com.janr.itsm.repository.TicketRepository;
+import com.janr.itsm.request.TicketUpdateRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
@@ -127,30 +128,64 @@ public class TicketImpl implements TicketService {
     }
 
     @Override
-    public TicketDto updateTicket(Long ticketId, Ticket ticket, User currentUser) {
+    public TicketDto updateTicket(Long ticketId, TicketUpdateRequest request, User currentUser) {
         Ticket ticketUpdated = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new NotFoundException("Ticket not found"));;
 
         switch (currentUser.getRole()) {
+            case EMPLOYEE -> {
+                applyEmployeeUpdates(ticketUpdated, request.getStatus());
+            }
             case ADMIN -> {
-                if (ticket.getPriority() != null) {
-                    ticketUpdated.setPriority(ticket.getPriority());
-                }
-                if (ticket.getStatus() != null) {
-                    ticketUpdated.setStatus(ticket.getStatus());
-                }
+                applyAdminUpdates(ticketUpdated, request.getStatus(), request.getPriority());
             }
             case SUPPORT_STAFF -> {
-                if (ticket.getStatus() != null) {
-                    ticketUpdated.setStatus(ticket.getStatus());
-                } else {
-                    throw new AccessDeniedException("Staff cannot change priority");
-                }
+                applyStaffUpdates(ticketUpdated, request.getStatus());
             }
             default -> throw new AccessDeniedException("Authorized role");
         }
         return convertToDto(ticketRepository.save(ticketUpdated));
 
+    }
+    private void applyEmployeeUpdates(Ticket ticket, Status newStatus) {
+        if (newStatus == null) {
+            throw new IllegalArgumentException("newStatus cannot be null");
+        }
+        if (newStatus != Status.CLOSED) {
+            throw new IllegalStateException("Customer can only close tickets");
+        }
+
+        ticket.setStatus(newStatus);
+    }
+    private void applyAdminUpdates(Ticket ticket, Status newStatus, Priority newPriority){
+        if (newPriority != null) {
+            ticket.setPriority(newPriority);
+        }
+
+        if (newStatus != null) {
+            ticket.setStatus(newStatus);
+        }
+
+    }
+    private void applyStaffUpdates(Ticket ticket, Status newStatus) {
+        Status current = ticket.getStatus();
+        if (current == null) {
+            throw new AccessDeniedException("Staff cannot update a ticket without a status");
+        }
+
+        if (newStatus == null) {
+            throw new IllegalArgumentException("newStatus cannot be null");
+        }
+
+        if (newStatus.ordinal() < current.ordinal()) {
+            throw new IllegalStateException("STAFF cannot move backward");
+        }
+
+        if (newStatus == Status.CLOSED) {
+            throw new IllegalStateException("Staff cannot cancel incident");
+        }
+
+        ticket.setStatus(newStatus);
     }
 
     @Override

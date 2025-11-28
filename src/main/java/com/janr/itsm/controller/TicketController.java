@@ -2,6 +2,7 @@ package com.janr.itsm.controller;
 
 import com.janr.itsm.auth.model.User;
 import com.janr.itsm.model.Ticket;
+import com.janr.itsm.request.TicketUpdateRequest;
 import com.janr.itsm.response.ApiResponse;
 import com.janr.itsm.service.ticket.TicketService;
 import jakarta.validation.Valid;
@@ -50,8 +51,8 @@ public class TicketController {
     }
 
     @PutMapping("/update/{id}")
-    @PreAuthorize("hasAnyRole('SUPPORT_STAFF', 'ADMIN')")
-    public ResponseEntity<ApiResponse> updateTicket (@PathVariable Long id, @RequestBody Ticket ticket,
+    @PreAuthorize("hasAnyRole('EMPLOYEE', 'SUPPORT_STAFF', 'ADMIN')")
+    public ResponseEntity<ApiResponse> updateTicket (@PathVariable Long id, @RequestBody TicketUpdateRequest ticket,
                                                      @AuthenticationPrincipal User currentUser) {
         return okResponse(ticketService.updateTicket(id, ticket, currentUser));
     }
