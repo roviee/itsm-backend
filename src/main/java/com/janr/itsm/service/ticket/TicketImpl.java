@@ -11,7 +11,12 @@ import com.janr.itsm.exceptions.NotFoundException;
 import com.janr.itsm.model.Ticket;
 import com.janr.itsm.repository.TicketRepository;
 import com.janr.itsm.request.TicketUpdateRequest;
+import com.janr.itsm.response.TicketResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -28,8 +33,20 @@ public class TicketImpl implements TicketService {
     private static final String PREFIX = "INC";
 
     @Override
-    public List<TicketDto> getAllTicket() {
-        return getConvertedTicketItem(ticketRepository.findAll());
+    public TicketResponse getAllTicket(Integer pageNumber, Integer pageSize, String sortBy, String dir) {
+
+        Sort sort = dir.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(pageNumber,pageSize, sort);
+
+        Page<Ticket> ticketPage = ticketRepository.findAll(pageable);
+
+        List<TicketDto> ticketDtos = getConvertedTicketItem(ticketPage.getContent());
+
+        return new TicketResponse(ticketDtos,pageNumber,pageSize,
+                ticketPage.getTotalElements(),
+                ticketPage.getTotalPages(),
+                ticketPage.isFirst(),
+                ticketPage.isLast());
     }
 
     @Override

@@ -4,11 +4,13 @@ import com.janr.itsm.auth.model.User;
 import com.janr.itsm.dto.TicketDto;
 import com.janr.itsm.model.Ticket;
 import com.janr.itsm.request.TicketUpdateRequest;
+import com.janr.itsm.response.TicketResponse;
 
 import java.util.List;
 
 public interface TicketService {
-    List<TicketDto> getAllTicket();
+    TicketResponse getAllTicket(Integer pageNumber, Integer pageSize,
+                                String sortBy, String dir);
     TicketDto getTicketById(Long id, User currentUser);
     TicketDto createTicket(Ticket ticket);
     List<TicketDto> getTicketForUser(User currentUser);
