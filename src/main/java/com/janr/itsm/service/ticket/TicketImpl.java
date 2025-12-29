@@ -64,9 +64,7 @@ public class TicketImpl implements TicketService {
     private boolean canViewTicket(User user, Ticket ticket) {
         return switch (user.getRole()) {
             case ADMIN -> true;
-            case SUPPORT_STAFF -> {
-                yield user.equals(ticket.getAssignedTo());
-            }
+            case SUPPORT_STAFF -> user.equals(ticket.getAssignedTo());
             default -> user.equals(ticket.getCreatedBy());
         };
     }
@@ -129,7 +127,7 @@ public class TicketImpl implements TicketService {
     public TicketDto assignTicket(Long ticketId, Long staffId) {
 
         Ticket ticket = ticketRepository.findById(ticketId)
-                .orElseThrow(() -> new NotFoundException("Ticket not found"));;
+                .orElseThrow(() -> new NotFoundException("Ticket not found"));
 
         User staff = userRepository.findById(staffId)
                 .orElseThrow(() -> new IllegalStateException("Staff not found"));
@@ -147,18 +145,12 @@ public class TicketImpl implements TicketService {
     @Override
     public TicketDto updateTicket(Long ticketId, TicketUpdateRequest request, User currentUser) {
         Ticket ticketUpdated = ticketRepository.findById(ticketId)
-                .orElseThrow(() -> new NotFoundException("Ticket not found"));;
+                .orElseThrow(() -> new NotFoundException("Ticket not found"));
 
         switch (currentUser.getRole()) {
-            case EMPLOYEE -> {
-                applyEmployeeUpdates(ticketUpdated, request.getStatus());
-            }
-            case ADMIN -> {
-                applyAdminUpdates(ticketUpdated, request.getStatus(), request.getPriority());
-            }
-            case SUPPORT_STAFF -> {
-                applyStaffUpdates(ticketUpdated, request.getStatus());
-            }
+            case EMPLOYEE -> applyEmployeeUpdates(ticketUpdated, request.getStatus());
+            case ADMIN -> applyAdminUpdates(ticketUpdated, request.getStatus(), request.getPriority());
+            case SUPPORT_STAFF -> applyStaffUpdates(ticketUpdated, request.getStatus());
             default -> throw new AccessDeniedException("Authorized role");
         }
         return convertToDto(ticketRepository.save(ticketUpdated));
